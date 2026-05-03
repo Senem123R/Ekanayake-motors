@@ -1,0 +1,11 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Secrets - NEVER upload these!
+.env
+serviceAccountKey.json
+
+# VS Code
+.vscode/
