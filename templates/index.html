@@ -1,118 +1,617 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ekanayake Motor Industries</title>
-  <!-- Tailwind CSS (CDN for development) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#C0272D',
-            dark: '#16213E',
-          }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekanayake Motor Industries — Spare Parts Sri Lanka</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        red: { DEFAULT: '#C0272D', dark: '#8B1A1F' },
+        navy: { DEFAULT: '#16213E', light: '#0F3460' },
+        gold: '#F5A623',
+      },
+      fontFamily: {
+        heading: ['Rajdhani', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
       }
     }
-  </script>
+  }
+}
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-heading { font-family: 'Rajdhani', sans-serif; }
+  .pc { transition: transform 0.2s, box-shadow 0.2s; }
+  .pc:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .fbtn.on { background: #C0272D; color: white; border-color: #C0272D; }
+  .badge-mfg { background: #C0272D; color: white; }
+  .badge-avail { background: #2E7D32; color: white; }
+  .spinner { width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#C0272D;border-radius:50%;animation:spin .7s linear infinite;margin:60px auto; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  /* Modal */
+  #modal-backdrop { display:none; }
+  #modal-backdrop.open { display:flex; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:#f1f1f1; }
+  ::-webkit-scrollbar-thumb { background:#C0272D; border-radius:3px; }
+</style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-gray-800">
 
-  <!-- Navbar -->
-  <nav class="bg-dark text-white px-6 py-4 flex justify-between items-center">
-    <div class="text-xl font-bold">
-      <span class="text-white">Ekanayake</span>
-      <span class="text-primary">Motors</span>
+<!-- ── TOP BAR ── -->
+<div class="bg-red text-white text-xs py-2 px-4 flex justify-between items-center">
+  <span>📍 201/1/1, Halpitawatta, Polgasowita, Colombo – Horana Rd, Piliyandala</span>
+  <a href="tel:+94772366236" class="font-semibold hover:underline">📞 +94 77 236 6236</a>
+</div>
+
+<!-- ── NAVBAR ── -->
+<nav class="bg-navy text-white sticky top-0 z-50 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <a href="#" class="flex items-center gap-2">
+      <div class="w-9 h-9 bg-red rounded-lg flex items-center justify-center font-heading font-bold text-xl">E</div>
+      <div class="font-heading text-lg font-bold">
+        <span class="text-white">Ekanayake</span>
+        <span class="text-gold"> Motor</span>
+      </div>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="#catalog" class="hover:text-gold transition">Catalog</a>
+      <a href="#by-vehicle" class="hover:text-gold transition">By Vehicle</a>
+      <a href="#special-order" class="hover:text-gold transition">Special Order</a>
+      <a href="#about" class="hover:text-gold transition">About</a>
+      <a href="#contact" class="hover:text-gold transition">Contact</a>
     </div>
-    <a href="#catalog" 
-       class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700">
+    <a href="#special-order"
+       class="bg-red hover:bg-red-dark text-white px-4 py-2 rounded-lg font-semibold text-sm transition">
       Order Now
     </a>
-  </nav>
+  </div>
+</nav>
 
-  <!-- Product Grid -->
-  <section id="catalog" class="max-w-7xl mx-auto px-4 py-10">
-    <h2 class="text-3xl font-bold text-center mb-8">Spare Parts Catalog</h2>
-    
-    <!-- Filter Buttons -->
-    <div class="flex flex-wrap gap-2 mb-6" id="filters">
-      <button onclick="filterProducts('all')" 
-              class="filter-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold">
-        All
-      </button>
-      <button onclick="filterProducts('Toyota')"
-              class="filter-btn bg-white border px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100">
-        Toyota
-      </button>
-      <!-- Add more filters -->
+<!-- ── HERO ── -->
+<section class="bg-navy text-white py-16 px-4">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 bg-white/10 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+        🏭 MANUFACTURER &amp; DISTRIBUTOR — SRI LANKA
+      </div>
+      <h1 class="font-heading text-5xl font-bold leading-tight mb-4">
+        10000+ Auto Parts<br>for <span class="text-gold">Every Vehicle</span><br>Fast &amp; Reliable
+      </h1>
+      <p class="text-gray-300 text-sm mb-6 max-w-md">
+        Engine mounts, gearbox mounts, shock absorber mounts, stabilizer links, lower arm bushes, rack ends, ball joints and more. Serving Toyota, Nissan, Honda, Suzuki, Mitsubishi, Mazda, Isuzu and Daihatsu vehicle owners in Sri Lanka and worldwide.
+      </p>
+      <div class="flex gap-3 flex-wrap">
+        <a href="#catalog" class="bg-red hover:bg-red-dark px-5 py-3 rounded-lg font-semibold text-sm transition">Browse All Parts</a>
+        <a href="#special-order" class="border border-white/30 hover:border-white px-5 py-3 rounded-lg font-semibold text-sm transition">Request Any Part</a>
+      </div>
+      <div class="flex gap-6 mt-8 text-center">
+        <div><div class="font-heading text-3xl font-bold text-gold">10000+</div><div class="text-xs text-gray-400">PARTS LISTED</div></div>
+        <div><div class="font-heading text-3xl font-bold text-gold">15+</div><div class="text-xs text-gray-400">YEARS EXP.</div></div>
+        <div><div class="font-heading text-3xl font-bold text-gold">24hr</div><div class="text-xs text-gray-400">SOURCING</div></div>
+        <div><div class="font-heading text-3xl font-bold text-gold">7</div><div class="text-xs text-gray-400">BRANDS</div></div>
+      </div>
     </div>
-
-    <!-- Count -->
-    <p class="text-gray-500 mb-4" id="count">Loading...</p>
-    
-    <!-- Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4" 
-         id="product-grid">
-      <!-- Loading skeleton -->
-      <div class="animate-pulse bg-gray-200 h-48 rounded-xl"></div>
-      <div class="animate-pulse bg-gray-200 h-48 rounded-xl"></div>
-      <div class="animate-pulse bg-gray-200 h-48 rounded-xl"></div>
+    <!-- Search box -->
+    <div class="bg-white rounded-2xl p-6 text-gray-800 shadow-2xl">
+      <h3 class="font-heading text-xl font-bold mb-1">Find Your Part Instantly</h3>
+      <p class="text-xs text-gray-500 mb-4">Search by Part Number, Vehicle Model, or Part Type</p>
+      <div class="flex gap-2 mb-3">
+        <button onclick="setSearchTab('all',this)" class="search-tab flex-1 text-xs font-semibold py-2 px-3 rounded-lg bg-red text-white">🔍 All</button>
+        <button onclick="setSearchTab('num',this)" class="search-tab flex-1 text-xs font-semibold py-2 px-3 rounded-lg bg-gray-100 text-gray-600">🔩 Part No.</button>
+        <button onclick="setSearchTab('vehicle',this)" class="search-tab flex-1 text-xs font-semibold py-2 px-3 rounded-lg bg-gray-100 text-gray-600">🚗 Vehicle</button>
+      </div>
+      <input id="hero-search" type="text" placeholder="Car model, brand, part number, part type..."
+             oninput="heroSearch()"
+             class="w-full border-2 border-gray-200 focus:border-red rounded-lg px-4 py-3 text-sm outline-none mb-2">
+      <div class="text-xs text-gray-400" id="hero-count">Loading parts...</div>
     </div>
-  </section>
+  </div>
+</section>
 
+<!-- ── FEATURES BAR ── -->
+<div class="bg-white border-b border-gray-100 py-4">
+  <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-xs">
+    <div class="flex items-center gap-2 justify-center"><span class="text-xl">🏭</span><div><div class="font-semibold">Own Manufacturing</div><div class="text-gray-400">Selected parts made in-house</div></div></div>
+    <div class="flex items-center gap-2 justify-center"><span class="text-xl">⚡</span><div><div class="font-semibold">24-Hour Sourcing</div><div class="text-gray-400">Any part, any vehicle</div></div></div>
+    <div class="flex items-center gap-2 justify-center"><span class="text-xl">🌍</span><div><div class="font-semibold">Worldwide Shipping</div><div class="text-gray-400">Export available</div></div></div>
+    <div class="flex items-center gap-2 justify-center"><span class="text-xl">✅</span><div><div class="font-semibold">Quality Guaranteed</div><div class="text-gray-400">15+ years expertise</div></div></div>
+    <div class="flex items-center gap-2 justify-center"><span class="text-xl">💬</span><div><div class="font-semibold">WhatsApp Support</div><div class="text-gray-400">Instant response</div></div></div>
+  </div>
+</div>
+
+<!-- ── CATALOG ── -->
+<section id="catalog" class="max-w-7xl mx-auto px-4 py-12">
+  <div class="text-center mb-8">
+    <span class="text-xs font-bold text-red bg-red/10 px-3 py-1 rounded-full">ALL PARTS</span>
+    <h2 class="font-heading text-4xl font-bold mt-3 mb-2">Complete Spare Parts Catalog</h2>
+    <p class="text-gray-500 text-sm">Real product images from our price list. Filter by brand, type, or search by part number. Prices in LKR.</p>
+  </div>
+
+  <!-- Filter buttons -->
+  <div class="flex flex-wrap gap-2 mb-4" id="filter-row">
+    <button class="fbtn on text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('all',this)">All</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Rack End',this)">Rack End</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Silent Bush',this)">Silent Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Ball Joint',this)">Ball Joint</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Gear Box Mount',this)">GEAR BOX MOUNT</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Rear Arm Bush',this)">Rear Arm Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Trust Bearing',this)">Trust Bearing</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Engine Mount',this)">Engine Mounts</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Stabilizer Link',this)">Stabilizer Links</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Shocks Mounting',this)">Shock Mounts</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Lower Arm Bush',this)">Lower Arm Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Shock Bush',this)">Shock Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Rack Mount',this)">Rack Mount</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Up Arm Bush',this)">Up Arm Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Balance Bar Bush',this)">Balance Bar Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Spring Bush',this)">Spring Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('Cross Bar Bush',this)">Cross Bar Bush</button>
+    <button class="fbtn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white hover:bg-red hover:text-white hover:border-red transition" onclick="applyFilter('mfg',this)">🏭 Manufactured</button>
+  </div>
+
+  <!-- Count + search -->
+  <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+    <p class="text-sm text-gray-500" id="pinfo">Loading...</p>
+    <input id="inline-search" type="text" placeholder="Search by part #, vehicle, type..."
+           oninput="inlineSearch()"
+           class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-red w-64">
+  </div>
+
+  <!-- Product grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3" id="pg">
+    <div class="spinner col-span-full"></div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-between items-center mt-6 flex-wrap gap-3" id="pag-wrap" style="display:none!important">
+    <span class="text-sm text-gray-500" id="pag-info"></span>
+    <div class="flex gap-1" id="pag-btns"></div>
+  </div>
+</section>
+
+<!-- ── BY VEHICLE ── -->
+<section id="by-vehicle" class="bg-navy text-white py-12 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-8">
+      <span class="text-xs font-bold text-gold bg-gold/20 px-3 py-1 rounded-full">SEARCH BY VEHICLE</span>
+      <h2 class="font-heading text-4xl font-bold mt-3 mb-2">Parts for Your Vehicle</h2>
+      <p class="text-gray-400 text-sm">Click your vehicle brand to filter the catalog instantly</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <button onclick="filterByBrand('Toyota')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Toyota</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">Corolla, Prius, Vios...</div>
+      </button>
+      <button onclick="filterByBrand('Nissan')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Nissan</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">March, D22, X-Trail...</div>
+      </button>
+      <button onclick="filterByBrand('Honda')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Honda</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">Jazz, Civic, CRV...</div>
+      </button>
+      <button onclick="filterByBrand('Suzuki')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Suzuki</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">WagonR, Swift...</div>
+      </button>
+      <button onclick="filterByBrand('Mitsubishi')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Mitsubishi</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">Lancer, Pajero...</div>
+      </button>
+      <button onclick="filterByBrand('Mazda')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Mazda</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">323, BJ, Demio...</div>
+      </button>
+      <button onclick="filterByBrand('Isuzu')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Isuzu</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">TFR, D-Max...</div>
+      </button>
+      <button onclick="filterByBrand('Daihatsu')" class="brand-card bg-white/5 hover:bg-red border border-white/10 hover:border-red rounded-xl p-4 text-center transition group">
+        <div class="font-heading font-bold text-lg">Daihatsu</div>
+        <div class="text-xs text-gray-400 mt-1 group-hover:text-white/80">Terios, Rush...</div>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── SPECIAL ORDER ── -->
+<section id="special-order" class="py-12 px-4 bg-gray-50">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <span class="text-xs font-bold text-red bg-red/10 px-3 py-1 rounded-full">24-HOUR SPECIAL ORDER</span>
+      <h2 class="font-heading text-4xl font-bold mt-4 mb-3">Part Not Listed?<br>We Can Still <span class="text-red">Get It</span></h2>
+      <p class="text-gray-500 text-sm mb-5">Through our extensive international dealer network, we source virtually any automotive spare part within 24 hours.</p>
+      <ul class="space-y-2 text-sm">
+        <li class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Parts not in our catalog? Still available to order</li>
+        <li class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> International supplier network across Japan &amp; Asia</li>
+        <li class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Bulk orders for garages and workshops welcome</li>
+        <li class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> WhatsApp confirmation within 2 hours</li>
+        <li class="flex items-center gap-2"><span class="text-green-600 font-bold">✓</span> Competitive pricing, fast worldwide shipping</li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+      <h3 class="font-heading text-xl font-bold mb-1">Request Any Part</h3>
+      <p class="text-xs text-gray-400 mb-4">Fill in the form — WhatsApp opens with your request ready to send</p>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Your Name *</label>
+          <input id="ord-name" type="text" placeholder="Full name" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Phone / WhatsApp *</label>
+          <input id="ord-phone" type="text" placeholder="+94 77..." class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Vehicle Make</label>
+          <select id="ord-make" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+            <option value="">Select...</option>
+            <option>Toyota</option><option>Nissan</option><option>Honda</option>
+            <option>Suzuki</option><option>Mitsubishi</option><option>Mazda</option>
+            <option>Isuzu</option><option>Daihatsu</option><option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Vehicle Model</label>
+          <input id="ord-model" type="text" placeholder="e.g. WagonR, Axio" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Part Name or Number *</label>
+        <input id="ord-part" type="text" placeholder="e.g. Engine mount or 12305-21060" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+      </div>
+      <div class="mb-3">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Country / City</label>
+        <input id="ord-city" type="text" placeholder="e.g. Colombo, Sri Lanka" class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red">
+      </div>
+      <div class="mb-4">
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Additional Details</label>
+        <textarea id="ord-note" rows="2" placeholder="Year of vehicle, quantity needed..." class="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:border-red resize-none"></textarea>
+      </div>
+      <button onclick="submitOrder()"
+              class="w-full bg-red hover:bg-red-dark text-white py-3 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-2">
+        💬 Send Request on WhatsApp
+      </button>
+      <p class="text-xs text-gray-400 text-center mt-2">* Required fields. WhatsApp will open with your details pre-filled — just press Send.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about" class="py-12 px-4 bg-white">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <span class="text-xs font-bold text-red bg-red/10 px-3 py-1 rounded-full">ABOUT US</span>
+      <h2 class="font-heading text-4xl font-bold mt-4 mb-4">Sri Lanka's Trusted<br>Parts Specialist</h2>
+      <p class="text-gray-500 text-sm mb-3">Established in 2010, Ekanayake Motor Industries has been supplying premium automotive spare parts to vehicle owners, garages and workshops across Sri Lanka and internationally for over 15 years.</p>
+      <p class="text-gray-500 text-sm mb-5">We are both a <strong class="text-gray-800">manufacturer</strong> of select rubber automotive components and an <strong class="text-gray-800">authorized distributor</strong> of spare parts for Toyota, Nissan, Honda, Suzuki, Mitsubishi, Mazda, Isuzu and Daihatsu.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border-l-4 border-red pl-3"><div class="font-semibold text-sm">🏭 Own Manufacturing</div><div class="text-xs text-gray-400">Selected rubber parts to OEM spec</div></div>
+        <div class="border-l-4 border-red pl-3"><div class="font-semibold text-sm">🌐 Global Network</div><div class="text-xs text-gray-400">Supplier partnerships across Japan &amp; Asia</div></div>
+        <div class="border-l-4 border-red pl-3"><div class="font-semibold text-sm">✅ Quality Assured</div><div class="text-xs text-gray-400">Every part tested before dispatch</div></div>
+        <div class="border-l-4 border-red pl-3"><div class="font-semibold text-sm">🚀 Fast Dispatch</div><div class="text-xs text-gray-400">Same-day for in-stock; 24hr for special</div></div>
+      </div>
+    </div>
+    <div class="bg-navy text-white rounded-2xl p-8">
+      <h3 class="font-heading text-2xl font-bold text-center mb-6 text-gold">By The Numbers</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white/10 rounded-xl p-4 text-center"><div class="font-heading text-4xl font-bold text-gold">15+</div><div class="text-xs text-gray-300 mt-1">Years in Business</div></div>
+        <div class="bg-white/10 rounded-xl p-4 text-center"><div class="font-heading text-4xl font-bold text-gold">10000+</div><div class="text-xs text-gray-300 mt-1">Listed Parts</div></div>
+        <div class="bg-white/10 rounded-xl p-4 text-center"><div class="font-heading text-4xl font-bold text-gold">7+</div><div class="text-xs text-gray-300 mt-1">Vehicle Brands</div></div>
+        <div class="bg-white/10 rounded-xl p-4 text-center"><div class="font-heading text-4xl font-bold text-gold">24hr</div><div class="text-xs text-gray-300 mt-1">Special Orders</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section id="contact" class="py-12 px-4 bg-gray-50">
+  <div class="max-w-7xl mx-auto text-center mb-8">
+    <span class="text-xs font-bold text-red bg-red/10 px-3 py-1 rounded-full">GET IN TOUCH</span>
+    <h2 class="font-heading text-4xl font-bold mt-3 mb-2">Contact Ekanayake Motor Industries</h2>
+    <p class="text-gray-500 text-sm">Reach us via WhatsApp, phone or email — we respond fast</p>
+  </div>
+  <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+    <div>
+      <h3 class="font-heading text-xl font-bold mb-4">Speak to a Parts Expert</h3>
+      <div class="space-y-4 text-sm">
+        <div class="flex items-start gap-3"><div class="w-10 h-10 bg-red/10 rounded-lg flex items-center justify-center text-red flex-shrink-0">📞</div><div><div class="font-semibold">PHONE</div><a href="tel:+94772366236" class="text-red hover:underline">+94 77 236 6236</a></div></div>
+        <div class="flex items-start gap-3"><div class="w-10 h-10 bg-red/10 rounded-lg flex items-center justify-center text-red flex-shrink-0">📍</div><div><div class="font-semibold">LOCATION</div><div class="text-gray-500">201/1/1, Halpitawatta, Polgasowita, Colombo - Horana Rd, Piliyandala</div></div></div>
+        <div class="flex items-start gap-3"><div class="w-10 h-10 bg-red/10 rounded-lg flex items-center justify-center text-red flex-shrink-0">🕐</div><div><div class="font-semibold">HOURS</div><div class="text-gray-500">Mon–Sat: 8:00 AM – 9:00 PM</div></div></div>
+      </div>
+      <a href="https://wa.me/94772366236?text=Hello!" target="_blank"
+         class="inline-flex items-center gap-2 mt-5 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-xl font-semibold text-sm transition">
+        💬 Chat on WhatsApp
+      </a>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow border border-gray-100">
+      <h3 class="font-heading text-xl font-bold mb-4">Send an Inquiry</h3>
+      <input id="inq-name" type="text" placeholder="Full name" class="w-full border rounded-lg px-3 py-2 text-sm mb-3 outline-none focus:border-red">
+      <input id="inq-email" type="email" placeholder="your@email.com" class="w-full border rounded-lg px-3 py-2 text-sm mb-3 outline-none focus:border-red">
+      <input id="inq-subject" type="text" placeholder="Parts inquiry, pricing, shipping..." class="w-full border rounded-lg px-3 py-2 text-sm mb-3 outline-none focus:border-red">
+      <textarea id="inq-msg" rows="3" placeholder="Tell us what you need..." class="w-full border rounded-lg px-3 py-2 text-sm mb-4 outline-none focus:border-red resize-none"></textarea>
+      <button onclick="submitInquiry()"
+              class="w-full bg-red hover:bg-red-dark text-white py-3 rounded-xl font-semibold text-sm transition">
+        💬 Send Inquiry on WhatsApp
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="bg-navy text-white py-8 px-4">
+  <div class="max-w-7xl mx-auto text-center text-sm text-gray-400">
+    <div class="font-heading text-xl font-bold text-white mb-2">Ekanayake <span class="text-gold">Motor Industries</span></div>
+    <p>201/1/1, Halpitawatta, Polgasowita, Colombo – Horana Rd, Piliyandala, Sri Lanka</p>
+    <p class="mt-1">© 2024 Ekanayake Motor Industries. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- ── PRODUCT MODAL ── -->
+<div id="modal-backdrop" class="fixed inset-0 bg-black/60 z-50 items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+  <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="relative">
+      <img id="m-img" src="" alt="" class="w-full h-56 object-contain bg-gray-50 rounded-t-2xl">
+      <button onclick="closeModal()" class="absolute top-3 right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow text-gray-500 hover:text-red">✕</button>
+      <span id="m-badge" class="absolute top-3 left-3 text-xs font-bold px-2 py-1 rounded-full"></span>
+    </div>
+    <div class="p-5">
+      <div class="text-xs text-gray-400 font-mono mb-1" id="m-num"></div>
+      <h3 class="font-heading text-2xl font-bold mb-1" id="m-name"></h3>
+      <div class="text-sm text-gray-500 mb-3"><strong>Fits:</strong> <span id="m-veh"></span></div>
+      <div class="font-heading text-3xl font-bold text-red mb-4" id="m-price"></div>
+      <button onclick="orderFromModal()"
+              class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition">
+        💬 Order on WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── WHATSAPP FLOAT ── -->
+<a href="https://wa.me/94772366236?text=Hello!" target="_blank"
+   class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center text-2xl shadow-lg z-40 transition">
+  💬
+</a>
+
+<!-- ── JAVASCRIPT ── -->
 <script>
 let allProducts = [];
 let filtered = [];
+let page = 1;
+const PER = 24;
+let currentModal = null;
 
-// Load products from Flask API
+// ── Load products from Flask API ──
 async function loadProducts() {
-  const res = await fetch('/api/products');
-  allProducts = await res.json();
-  filtered = [...allProducts];
-  renderProducts();
+  try {
+    const res = await fetch('/api/products');
+    allProducts = await res.json();
+    filtered = [...allProducts];
+    page = 1;
+    renderGrid();
+    document.getElementById('hero-count').textContent =
+      allProducts.length + ' parts ready — type to search instantly';
+  } catch(e) {
+    document.getElementById('pg').innerHTML =
+      '<div class="col-span-full text-center py-12 text-red font-semibold">Could not load products. Please refresh the page.</div>';
+  }
 }
 
-function renderProducts() {
-  const grid = document.getElementById('product-grid');
-  const count = document.getElementById('count');
-  count.textContent = `Showing ${filtered.length} parts`;
+// ── Render product grid ──
+function renderGrid() {
+  const grid = document.getElementById('pg');
+  const total = filtered.length;
+  const pages = Math.ceil(total / PER);
+  const start = (page - 1) * PER;
+  const slice = filtered.slice(start, start + PER);
 
-  grid.innerHTML = filtered.map(p => `
-    <div class="bg-white rounded-xl shadow-sm border hover:shadow-md 
-                transition cursor-pointer p-3"
-         onclick="openModal(${p.id})">
-      <div class="h-32 bg-gray-100 rounded-lg mb-3 overflow-hidden flex items-center justify-center">
-        ${p.imgUrl 
-          ? `<img src="${p.imgUrl}" class="w-full h-full object-contain" 
-                  onerror="this.parentNode.innerHTML='🔧'">`
-          : '<span class="text-4xl opacity-30">🔧</span>'
-        }
-      </div>
-      <span class="text-xs text-gray-400">${p.num}</span>
-      <h3 class="font-semibold text-sm mt-1">${p.type}</h3>
-      <p class="text-xs text-gray-500">Fits: ${p.vehicles}</p>
-      <div class="flex justify-between items-center mt-2">
-        <span class="text-primary font-bold">Rs ${p.price.toLocaleString()}</span>
-        <span class="text-xs px-2 py-1 rounded-full font-bold
-                     ${p.mfg ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
-          ${p.mfg ? 'MFG' : 'Stock'}
-        </span>
-      </div>
-    </div>
-  `).join('');
+  const pinfo = document.getElementById('pinfo');
+  pinfo.textContent = total > 0
+    ? 'Showing ' + (start + 1) + '–' + Math.min(start + PER, total) + ' of ' + total + ' parts'
+    : 'No parts found';
+
+  if (total === 0) {
+    grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><div class="text-4xl mb-3">🔍</div><p>No parts found matching your search.</p></div>';
+    document.getElementById('pag-wrap').style.display = 'none';
+    return;
+  }
+
+  grid.innerHTML = slice.map(function(p) {
+    var imgHtml = p.imgUrl
+      ? '<img src="' + p.imgUrl + '" alt="' + (p.type || '') + '" loading="lazy" class="w-full h-full object-contain" onerror="this.parentNode.innerHTML=\'<span class=text-4xl>🔧</span>\'">'
+      : '<span class="text-4xl opacity-20">🔧</span>';
+    var badge = p.mfg
+      ? '<span class="badge-mfg text-xs font-bold px-2 py-0.5 rounded-full absolute top-2 left-2">MANUFACTURED</span>'
+      : '<span class="badge-avail text-xs font-bold px-2 py-0.5 rounded-full absolute top-2 left-2">AVAILABLE</span>';
+    return '<div class="pc bg-white rounded-xl border border-gray-100 cursor-pointer overflow-hidden" onclick="openModal(' + p.id + ')">' +
+      '<div class="relative h-32 bg-gray-50 flex items-center justify-center">' + imgHtml + badge + '</div>' +
+      '<div class="p-3">' +
+        '<div class="text-xs text-gray-400 font-mono">' + (p.num || '') + '</div>' +
+        '<div class="font-semibold text-sm mt-0.5 leading-tight">' + (p.type || '') + '</div>' +
+        '<div class="text-xs text-gray-400 mt-1 truncate">Fits: ' + (p.vehicles || '') + '</div>' +
+        '<div class="flex justify-between items-center mt-2">' +
+          '<span class="font-heading font-bold text-red text-base">Rs ' + (p.price || 0).toLocaleString() + '</span>' +
+          '<button class="text-xs bg-navy text-white px-2 py-1 rounded-lg hover:bg-red transition" onclick="event.stopPropagation();openModal(' + p.id + ')">Details</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Pagination
+  var pw = document.getElementById('pag-wrap');
+  var pi = document.getElementById('pag-info');
+  var pb = document.getElementById('pag-btns');
+  pw.style.display = pages > 1 ? 'flex' : 'none';
+  pi.textContent = 'Page ' + page + ' of ' + pages;
+  pb.innerHTML = '';
+
+  // Prev
+  if (page > 1) {
+    var b = document.createElement('button');
+    b.className = 'px-3 py-1 border rounded-lg text-sm hover:bg-red hover:text-white hover:border-red transition';
+    b.textContent = '←';
+    b.onclick = function() { page--; renderGrid(); window.scrollTo(0,0); };
+    pb.appendChild(b);
+  }
+
+  // Page numbers
+  var sp = Math.max(1, page - 2), ep = Math.min(pages, sp + 4);
+  for (var i = sp; i <= ep; i++) {
+    var b2 = document.createElement('button');
+    b2.className = 'px-3 py-1 border rounded-lg text-sm transition ' + (i === page ? 'bg-red text-white border-red' : 'hover:bg-red hover:text-white hover:border-red');
+    b2.textContent = i;
+    (function(pg) { b2.onclick = function() { page = pg; renderGrid(); window.scrollTo(0,0); }; })(i);
+    pb.appendChild(b2);
+  }
+
+  // Next
+  if (page < pages) {
+    var b3 = document.createElement('button');
+    b3.className = 'px-3 py-1 border rounded-lg text-sm hover:bg-red hover:text-white hover:border-red transition';
+    b3.textContent = '→';
+    b3.onclick = function() { page++; renderGrid(); window.scrollTo(0,0); };
+    pb.appendChild(b3);
+  }
 }
 
-function filterProducts(brand) {
-  filtered = brand === 'all' 
-    ? [...allProducts]
-    : allProducts.filter(p => p.brand === brand || p.type === brand);
-  renderProducts();
+// ── Filters ──
+function applyFilter(f, btn) {
+  document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  document.getElementById('inline-search').value = '';
+  if (f === 'all') filtered = [...allProducts];
+  else if (f === 'mfg') filtered = allProducts.filter(function(p) { return p.mfg; });
+  else filtered = allProducts.filter(function(p) { return p.brand === f || p.type === f; });
+  page = 1;
+  renderGrid();
+  document.getElementById('catalog').scrollIntoView({behavior:'smooth'});
 }
 
-// Load on page open
+function filterByBrand(brand) {
+  applyFilter(brand, null);
+  document.getElementById('catalog').scrollIntoView({behavior:'smooth'});
+}
+
+function inlineSearch() {
+  var q = document.getElementById('inline-search').value.toLowerCase().trim();
+  document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('on'); });
+  document.querySelector('.fbtn').classList.add('on');
+  if (!q) { filtered = [...allProducts]; }
+  else {
+    filtered = allProducts.filter(function(p) {
+      return (p.num||'').toLowerCase().includes(q) ||
+             (p.type||'').toLowerCase().includes(q) ||
+             (p.vehicles||'').toLowerCase().includes(q) ||
+             (p.brand||'').toLowerCase().includes(q);
+    });
+  }
+  page = 1;
+  renderGrid();
+}
+
+function heroSearch() {
+  var q = document.getElementById('hero-search').value.toLowerCase().trim();
+  if (!q) { filtered = [...allProducts]; }
+  else {
+    filtered = allProducts.filter(function(p) {
+      return (p.num||'').toLowerCase().includes(q) ||
+             (p.type||'').toLowerCase().includes(q) ||
+             (p.vehicles||'').toLowerCase().includes(q) ||
+             (p.brand||'').toLowerCase().includes(q);
+    });
+  }
+  page = 1;
+  document.getElementById('catalog').scrollIntoView({behavior:'smooth'});
+  renderGrid();
+}
+
+function setSearchTab(tab, btn) {
+  document.querySelectorAll('.search-tab').forEach(function(b) {
+    b.className = b.className.replace('bg-red text-white', 'bg-gray-100 text-gray-600');
+  });
+  btn.className = btn.className.replace('bg-gray-100 text-gray-600', 'bg-red text-white');
+}
+
+// ── Modal ──
+function openModal(id) {
+  var p = allProducts.find(function(x) { return x.id === id; });
+  if (!p) return;
+  currentModal = p;
+  document.getElementById('m-img').src = p.imgUrl || p.img || '';
+  document.getElementById('m-num').textContent = p.num || '';
+  document.getElementById('m-name').textContent = (p.brand || '') + ' — ' + (p.type || '');
+  document.getElementById('m-veh').textContent = p.vehicles || '';
+  document.getElementById('m-price').textContent = 'Rs ' + (p.price || 0).toLocaleString();
+  var badge = document.getElementById('m-badge');
+  badge.textContent = p.mfg ? 'MANUFACTURED' : 'AVAILABLE';
+  badge.className = 'absolute top-3 left-3 text-xs font-bold px-2 py-1 rounded-full ' + (p.mfg ? 'badge-mfg' : 'badge-avail');
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function orderFromModal() {
+  if (!currentModal) return;
+  var msg = 'Hello! I want to order:\n\n';
+  msg += '🔩 *Part:* ' + (currentModal.type || '') + '\n';
+  msg += '🔢 *Part Number:* ' + (currentModal.num || '') + '\n';
+  msg += '💰 *Price:* Rs ' + (currentModal.price || 0).toLocaleString() + '\n\n';
+  msg += '_Sent from ekanayakamotors.lk_';
+  window.open('https://wa.me/94772366236?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── Orders ──
+function submitOrder() {
+  var name  = document.getElementById('ord-name').value.trim();
+  var phone = document.getElementById('ord-phone').value.trim();
+  var make  = document.getElementById('ord-make').value;
+  var model = document.getElementById('ord-model').value.trim();
+  var part  = document.getElementById('ord-part').value.trim();
+  var city  = document.getElementById('ord-city').value.trim();
+  var note  = document.getElementById('ord-note').value.trim();
+  if (!name || !phone || !part) { alert('Please fill in Name, Phone and Part fields.'); return; }
+
+  // Save to Flask API
+  fetch('/api/orders', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name:name, phone:phone, vehicle:make+' '+model, part:part, city:city, note:note})
+  });
+
+  // Open WhatsApp
+  var msg = '🛒 *New Part Request*\n\n';
+  msg += '👤 *Name:* ' + name + '\n';
+  msg += '📞 *Phone:* ' + phone + '\n';
+  if (make) msg += '🚗 *Vehicle:* ' + make + ' ' + model + '\n';
+  msg += '🔩 *Part:* ' + part + '\n';
+  if (city) msg += '📍 *City:* ' + city + '\n';
+  if (note) msg += '📝 *Details:* ' + note + '\n';
+  msg += '\n_Sent from ekanayakamotors.lk_';
+  window.open('https://wa.me/94772366236?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function submitInquiry() {
+  var name = document.getElementById('inq-name').value.trim();
+  var msg  = document.getElementById('inq-msg').value.trim();
+  if (!name || !msg) { alert('Please fill in name and message.'); return; }
+  var wa = 'Hello, I have an inquiry:\n\nName: ' + name + '\nMessage: ' + msg;
+  window.open('https://wa.me/94772366236?text=' + encodeURIComponent(wa), '_blank');
+}
+
+// ── Init ──
 loadProducts();
 </script>
 </body>
