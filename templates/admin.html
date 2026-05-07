@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekanayake Motor — Admin Panel</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--r:#DC2626;--rd:#991B1B;--bg:#F7F6F3;--dark:#0C0A09;--card:#FFF;--border:#E7E5E4;--sidebar:#111;--muted:#78716C;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:#1C1917;overflow-x:hidden;}
+.syne{font-family:'Syne',sans-serif;} .mono{font-family:'DM Mono',monospace;}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#D6D3D1;border-radius:2px;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:9999;background:var(--dark);display:flex;align-items:center;justify-content:center;}
+@keyframes loginIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.login-box{animation:loginIn .5s ease;background:white;border-radius:24px;padding:44px 40px;width:100%;max-width:420px;box-shadow:0 40px 80px rgba(0,0,0,.5);}
+
+/* SIDEBAR */
+aside{background:var(--sidebar);width:240px;height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100;border-right:1px solid rgba(255,255,255,.06);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,.45);cursor:pointer;transition:all .2s;margin-bottom:2px;}
+.nav-item:hover{color:white;background:rgba(255,255,255,.06);}
+.nav-item.on{color:white;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.2);}
+.nav-item.on .ni{color:var(--r);}
+.ni{font-size:16px;width:18px;text-align:center;flex-shrink:0;}
+.nav-sec{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.2);padding:0 14px;margin:16px 0 6px;text-transform:uppercase;}
+
+/* MAIN */
+#main{margin-left:240px;min-height:100vh;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+
+/* STATS */
+.stat-card{background:white;border-radius:16px;border:1px solid var(--border);padding:20px;transition:all .2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{background:#FAFAF9;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{padding:11px 14px;font-size:13px;border-bottom:1px solid #F5F4F2;}
+.tbl tr:last-child td{border:none;}
+.tbl tr:hover td{background:#FAFAF9;}
+
+/* BADGES */
+.bmfg{background:#FEF2F2;color:var(--r);border:1px solid #FECACA;font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;}
+.bavail{background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border:none;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-r{background:var(--r);color:white;}.btn-r:hover{background:var(--rd);}
+.btn-dk{background:var(--dark);color:white;}.btn-dk:hover{background:#292524;}
+.btn-g{background:transparent;color:#1C1917;border:1.5px solid var(--border);}.btn-g:hover{background:#F5F4F2;border-color:#A8A29E;}
+.btn-gr{background:#16A34A;color:white;}.btn-gr:hover{background:#15803D;}
+.bsm{padding:6px 12px;font-size:12px;border-radius:7px;}
+
+/* MODAL */
+#modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:20px;}
+#modal-bg.open{display:flex;}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+.modal-box{background:white;border-radius:20px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease;box-shadow:0 30px 60px rgba(0,0,0,.2);}
+
+/* PHOTO DROP */
+.drop-zone{border:2px dashed #D6D3D1;border-radius:14px;padding:26px;text-align:center;cursor:pointer;transition:all .25s;background:#FAFAF9;position:relative;overflow:hidden;}
+.drop-zone:hover,.drop-zone.over{border-color:var(--r);background:#FFF5F5;}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+
+/* FORM INPUT */
+.fi{background:#F7F6F3;border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;width:100%;outline:none;transition:all .2s;color:#1C1917;}
+.fi:focus{border-color:var(--r);background:white;box-shadow:0 0 0 3px rgba(220,38,38,.08);}
+.fi::placeholder{color:#A8A29E;}
+select.fi option{background:white;}
+.flabel{font-size:10.5px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* TABS */
+.tab-pill{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;background:transparent;color:var(--muted);font-family:inherit;}
+.tab-pill.on{background:var(--r);color:white;}
+
+/* DRIVE INPUT */
+.di{background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:10px;padding:10px 13px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;width:100%;outline:none;transition:all .2s;color:#1C1917;}
+.di:focus{border-color:#16A34A;box-shadow:0 0 0 3px rgba(22,163,74,.1);}
+.di::placeholder{color:#86EFAC;}
+
+/* SEARCH */
+.sbox{background:#F7F6F3;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:8px;padding:8px 13px;transition:all .2s;}
+.sbox:focus-within{border-color:var(--r);background:white;box-shadow:0 0 0 3px rgba(220,38,38,.08);}
+.sbox input{background:transparent;border:none;outline:none;font-size:13px;font-family:inherit;width:100%;color:#1C1917;}
+.sbox input::placeholder{color:#A8A29E;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:white;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;max-width:320px;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.ok{background:#16A34A;} #toast.err{background:var(--r);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.spin{animation:spin .7s linear infinite;}
+.section{display:none;animation:fadeUp .35s ease;}
+.section.on{display:block;}
+
+/* PAGINATION */
+.pbtn{width:32px;height:32px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.pbtn:hover{border-color:var(--r);color:var(--r);}
+.pbtn.on{background:var(--r);border-color:var(--r);color:white;}
+
+/* ORDER STATUS */
+.s-new{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;}
+.s-contacted{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;}
+.s-done{background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0;}
+.sbadge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;cursor:pointer;border:none;font-family:inherit;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     LOGIN
+══════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="flex items-center gap-3 mb-7">
+      <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center syne font-bold text-white text-xl">E</div>
+      <div>
+        <div class="syne font-bold text-xl">EKANAYAKE <span class="text-red-600">MOTOR</span></div>
+        <div class="text-stone-400 tracking-widest" style="font-size:9px">ADMIN PANEL</div>
+      </div>
+    </div>
+    <h2 class="syne font-bold text-2xl text-stone-900 mb-1">Welcome back</h2>
+    <p class="text-stone-400 text-sm mb-6">Sign in to manage products and orders</p>
+    <div id="lerr" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm mb-4"></div>
+    <div class="mb-4">
+      <label class="flabel">Email</label>
+      <input id="lem" type="email" class="fi" placeholder="your@email.com">
+    </div>
+    <div class="mb-6">
+      <label class="flabel">Password</label>
+      <input id="lpw" type="password" class="fi" placeholder="••••••••">
+    </div>
+    <button id="lbtn" class="btn btn-r w-full justify-center syne font-bold text-base tracking-wide" style="padding:13px">SIGN IN →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     APP
+══════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="p-5 mb-1" style="border-bottom:1px solid rgba(255,255,255,.06)">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center syne font-bold text-white">E</div>
+        <div>
+          <div class="syne font-bold text-white text-sm leading-none">EKANAYAKE <span class="text-amber-400">MOTOR</span></div>
+          <div class="text-stone-600 mt-0.5" style="font-size:9px;letter-spacing:1.5px">ADMIN PANEL</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-3">
+      <div class="nav-sec">Main</div>
+      <div class="nav-item on" data-sec="dashboard" onclick="goTo('dashboard',this)"><span class="ni">📊</span>Dashboard</div>
+      <div class="nav-sec">Catalog</div>
+      <div class="nav-item" data-sec="products" onclick="goTo('products',this)"><span class="ni">📦</span>All Products</div>
+      <div class="nav-item" data-sec="add" onclick="goTo('add',this)"><span class="ni">➕</span>Add Product</div>
+      <div class="nav-sec">Orders</div>
+      <div class="nav-item" data-sec="orders" onclick="goTo('orders',this)">
+        <span class="ni">📋</span>Customer Orders
+        <span id="obadge" class="ml-auto hidden text-xs font-bold bg-red-600 text-white px-2 py-0.5 rounded-full"></span>
+      </div>
+    </nav>
+
+    <div class="p-4" style="border-top:1px solid rgba(255,255,255,.06)">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-red-400" style="background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3)" id="uav">A</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-white text-sm font-semibold truncate" id="uname">Admin</div>
+          <div class="text-stone-500 text-xs">Administrator</div>
+        </div>
+        <button onclick="doLogout()" class="text-stone-600 hover:text-red-400 transition text-lg" title="Sign out">⏻</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="syne font-bold text-xl" id="ptitle">Dashboard</div>
+        <div class="text-stone-400 text-xs mt-0.5" id="psub">Overview</div>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <a href="http://127.0.0.1:5000" target="_blank" class="btn btn-g bsm">🌐 Website</a>
+        <button onclick="goTo('add',document.querySelector('[data-sec=add]'))" class="btn btn-r bsm">➕ Add Product</button>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD ── -->
+    <div id="s-dashboard" class="section on p-7">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+        <div class="stat-card"><div class="text-2xl mb-2">📦</div><div class="syne font-bold text-3xl" id="ds-tot">—</div><div class="text-xs text-stone-400 mt-1 uppercase tracking-wide font-semibold">Products</div></div>
+        <div class="stat-card"><div class="text-2xl mb-2">🏭</div><div class="syne font-bold text-3xl text-red-600" id="ds-mfg">—</div><div class="text-xs text-stone-400 mt-1 uppercase tracking-wide font-semibold">Manufactured</div></div>
+        <div class="stat-card"><div class="text-2xl mb-2">✅</div><div class="syne font-bold text-3xl text-green-600" id="ds-avail">—</div><div class="text-xs text-stone-400 mt-1 uppercase tracking-wide font-semibold">In Stock</div></div>
+        <div class="stat-card"><div class="text-2xl mb-2">📋</div><div class="syne font-bold text-3xl text-amber-500" id="ds-ord">—</div><div class="text-xs text-stone-400 mt-1 uppercase tracking-wide font-semibold">New Orders</div></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        <div class="px-5 py-4 flex justify-between items-center" style="border-bottom:1px solid #F5F4F2">
+          <div class="syne font-bold text-lg">Recent Products</div>
+          <button onclick="goTo('products',document.querySelector('[data-sec=products]'))" class="text-red-600 text-sm font-semibold hover:underline">View all →</button>
+        </div>
+        <div id="dash-recent"><div class="p-6 text-center text-stone-400 text-sm">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- ── PRODUCTS ── -->
+    <div id="s-products" class="section p-7">
+      <div class="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        <div class="px-5 py-4 flex justify-between items-center flex-wrap gap-3" style="border-bottom:1px solid #F5F4F2">
+          <div class="syne font-bold text-lg" id="ptxt">Products</div>
+          <div class="flex gap-2.5 flex-wrap">
+            <div class="sbox" style="width:220px">
+              <svg class="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input id="psrch" type="text" placeholder="Search products..." oninput="filterProds()">
+            </div>
+            <select id="pbrand" class="fi" style="width:auto;padding:8px 12px;font-size:13px" onchange="filterProds()">
+              <option value="">All Brands</option>
+              <option>Toyota</option><option>Nissan</option><option>Honda</option>
+              <option>Suzuki</option><option>Mitsubishi</option><option>Mazda</option>
+              <option>Isuzu</option><option>Daihatsu</option>
+            </select>
+            <select id="ptype" class="fi" style="width:auto;padding:8px 12px;font-size:13px" onchange="filterProds()">
+              <option value="">All Types</option>
+              <option>Engine Mount</option><option>Gear Box Mount</option><option>Stabilizer Link</option>
+              <option>Ball Joint</option><option>Rack End</option><option>Lower Arm Bush</option>
+              <option>Rear Arm Bush</option><option>Silent Bush</option><option>Shock Bush</option>
+              <option>Trust Bearing</option><option>Shocks Mounting</option>
+            </select>
+          </div>
+        </div>
+        <div id="ptable"><div class="p-8 text-center"><div class="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full spin mx-auto"></div></div></div>
+        <div id="ppag" class="px-5 py-3 flex justify-between items-center" style="border-top:1px solid #F5F4F2;display:none!important">
+          <span class="text-sm text-stone-400" id="ppag-info"></span>
+          <div class="flex gap-1" id="ppag-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD / EDIT ── -->
+    <div id="s-add" class="section p-7">
+      <div class="max-w-2xl">
+        <div class="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+          <div class="px-6 py-5" style="border-bottom:1px solid #F5F4F2">
+            <div class="syne font-bold text-xl" id="ftitle">Add New Product</div>
+            <div class="text-stone-400 text-sm mt-0.5">All starred fields are required</div>
+          </div>
+          <div class="p-6">
+            <input type="hidden" id="feid">
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div><label class="flabel">Part Number *</label><input id="fnum" class="fi mono" placeholder="e.g. 12305-21060"></div>
+              <div><label class="flabel">Part Type *</label>
+                <select id="ftype" class="fi">
+                  <option value="">Select type...</option>
+                  <option>Engine Mount</option><option>Gear Box Mount</option><option>Stabilizer Link</option>
+                  <option>Ball Joint</option><option>Rack End</option><option>Lower Arm Bush</option>
+                  <option>Rear Arm Bush</option><option>Silent Bush</option><option>Shock Bush</option>
+                  <option>Trust Bearing</option><option>Spring Bush</option><option>Shocks Mounting</option>
+                  <option>Up Arm Bush</option><option>Rack Mount</option><option>Balance Bar Bush</option>
+                  <option>CV Boot</option><option>Rack Boot</option><option>Center Bearing</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div><label class="flabel">Brand *</label>
+                <select id="fbrand" class="fi">
+                  <option value="">Select brand...</option>
+                  <option>Toyota</option><option>Nissan</option><option>Honda</option>
+                  <option>Suzuki</option><option>Mitsubishi</option><option>Mazda</option>
+                  <option>Isuzu</option><option>Daihatsu</option>
+                </select>
+              </div>
+              <div><label class="flabel">Price (LKR) *</label><input id="fprice" type="number" class="fi" placeholder="e.g. 4500" min="0"></div>
+            </div>
+
+            <div class="mb-4"><label class="flabel">Fits Vehicles *</label><input id="fveh" class="fi" placeholder="e.g. Prius, Corolla AE100, Premio — separate with commas"></div>
+
+            <div class="mb-5"><label class="flabel">Status *</label>
+              <select id="fmfg" class="fi">
+                <option value="false">✅ Available (In Stock from Supplier)</option>
+                <option value="true">🏭 Manufactured (Made by us)</option>
+              </select>
+            </div>
+
+            <!-- ══ PHOTO WIDGET ══ -->
+            <div class="mb-6">
+              <label class="flabel mb-3 block">Product Photo</label>
+
+              <!-- Preview -->
+              <div id="fphoto-wrap" class="hidden mb-3 relative">
+                <img id="fphoto" class="w-full max-h-44 object-contain rounded-xl border border-stone-100 bg-stone-50">
+                <button onclick="clearFPhoto()" class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-500 transition">✕</button>
+              </div>
+
+              <!-- Photo Method Tabs -->
+              <div class="flex gap-1 p-1 rounded-xl w-fit mb-3" style="background:#F0EFED">
+                <button class="tab-pill on" onclick="photoTab('direct',this)">📁 Upload</button>
+                <button class="tab-pill" onclick="photoTab('drive',this)">☁️ Drive</button>
+                <button class="tab-pill" onclick="photoTab('url',this)">🔗 URL</button>
+              </div>
+
+              <!-- Upload from device -->
+              <div id="pt-direct">
+                <div class="drop-zone" id="fdz">
+                  <input type="file" id="ffile" accept="image/*" onchange="onFile(this,'fphoto','fphoto-wrap','fimgd')">
+                  <div class="text-3xl mb-2 opacity-30">📷</div>
+                  <div class="font-semibold text-stone-700 text-sm mb-1">Click to upload or drag & drop</div>
+                  <div class="text-xs text-stone-400">JPG, PNG, WEBP up to 10MB · saves as base64</div>
+                </div>
+              </div>
+
+              <!-- Google Drive -->
+              <div id="pt-drive" style="display:none">
+                <div class="rounded-xl p-4 mb-3" style="background:#F0FDF4;border:1px solid #BBF7D0">
+                  <div class="font-semibold text-green-800 text-sm mb-2">📖 How to get a Google Drive link:</div>
+                  <ol class="text-xs text-green-700 space-y-1 list-decimal list-inside">
+                    <li>Upload your product photo to Google Drive</li>
+                    <li>Right-click the photo → <strong>Share</strong></li>
+                    <li>Set access to <strong>"Anyone with the link"</strong></li>
+                    <li>Click <strong>Copy link</strong> → paste below → click Preview</li>
+                  </ol>
+                </div>
+                <div class="flex gap-2">
+                  <input id="fdriveurl" class="di flex-1" placeholder="https://drive.google.com/file/d/...">
+                  <button onclick="previewDrive('fdriveurl','fphoto','fphoto-wrap','fimgd')" class="btn btn-gr bsm whitespace-nowrap">Preview →</button>
+                </div>
+                <div class="text-xs text-stone-400 mt-2">Link is converted to a direct thumbnail URL automatically</div>
+              </div>
+
+              <!-- Image URL -->
+              <div id="pt-url" style="display:none">
+                <div class="flex gap-2">
+                  <input id="fimgurl" class="fi flex-1" placeholder="https://example.com/product.jpg">
+                  <button onclick="previewUrl('fimgurl','fphoto','fphoto-wrap','fimgd')" class="btn btn-dk bsm whitespace-nowrap">Preview →</button>
+                </div>
+                <div class="text-xs text-stone-400 mt-2">Paste any direct image link</div>
+              </div>
+
+              <input type="hidden" id="fimgd">
+            </div>
+
+            <div class="flex gap-3">
+              <button onclick="saveProd()" class="btn btn-r flex-1 justify-center syne font-bold text-base tracking-wide" style="padding:13px">💾 SAVE PRODUCT</button>
+              <button onclick="clearForm()" class="btn btn-g">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ORDERS ── -->
+    <div id="s-orders" class="section p-7">
+      <div class="flex gap-2 mb-5">
+        <button class="tab-pill on" onclick="loadOrders('new',this)">🆕 New</button>
+        <button class="tab-pill" onclick="loadOrders('contacted',this)">📞 Contacted</button>
+        <button class="tab-pill" onclick="loadOrders('done',this)">✅ Done</button>
+        <button class="tab-pill" onclick="loadOrders('',this)">All</button>
+      </div>
+      <div id="ordwrap"><div class="text-center py-12 text-stone-400">Loading orders...</div></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════
+     EDIT MODAL
+══════════════════════════════════ -->
+<div id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="px-6 py-5 flex justify-between items-center" style="border-bottom:1px solid #F5F4F2">
+      <div class="syne font-bold text-xl" id="mtitle">Edit Product</div>
+      <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 transition" style="background:#F5F4F2">✕</button>
+    </div>
+    <div class="p-6">
+      <input type="hidden" id="mdocid">
+
+      <!-- Modal Photo -->
+      <div class="mb-4">
+        <label class="flabel mb-2 block">Photo</label>
+        <div class="flex gap-3">
+          <div class="w-24 h-24 bg-stone-100 rounded-xl border border-stone-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img id="mphoto" src="" alt="" class="w-full h-full object-contain" style="display:none">
+            <span id="mphoto-ph" class="text-3xl opacity-25">🔧</span>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="drop-zone" style="padding:14px;position:relative">
+              <input type="file" id="mfile" accept="image/*" onchange="onFile(this,'mphoto','mphoto','mimgd');document.getElementById('mphoto').style.display='block';document.getElementById('mphoto-ph').style.display='none'">
+              <div class="text-xs font-semibold text-stone-500">📁 Upload from computer</div>
+            </div>
+            <div class="flex gap-2">
+              <input id="mdriveurl" class="di text-xs flex-1" style="padding:8px 10px" placeholder="Paste Google Drive link...">
+              <button onclick="previewDrive('mdriveurl','mphoto','mphoto','mimgd');document.getElementById('mphoto').style.display='block';document.getElementById('mphoto-ph').style.display='none'" class="btn btn-gr bsm text-xs">Go</button>
+            </div>
+            <input type="hidden" id="mimgd">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="flabel">Part Number</label><input id="mnum" class="fi mono"></div>
+        <div><label class="flabel">Type</label>
+          <select id="mtype" class="fi">
+            <option>Engine Mount</option><option>Gear Box Mount</option><option>Stabilizer Link</option>
+            <option>Ball Joint</option><option>Rack End</option><option>Lower Arm Bush</option>
+            <option>Rear Arm Bush</option><option>Silent Bush</option><option>Shock Bush</option>
+            <option>Trust Bearing</option><option>Spring Bush</option><option>Shocks Mounting</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div><label class="flabel">Brand</label>
+          <select id="mbrand" class="fi">
+            <option>Toyota</option><option>Nissan</option><option>Honda</option>
+            <option>Suzuki</option><option>Mitsubishi</option><option>Mazda</option>
+            <option>Isuzu</option><option>Daihatsu</option>
+          </select>
+        </div>
+        <div><label class="flabel">Price (LKR)</label><input id="mprice" type="number" class="fi"></div>
+      </div>
+      <div class="mb-3"><label class="flabel">Fits Vehicles</label><input id="mveh" class="fi"></div>
+      <div class="mb-5"><label class="flabel">Status</label>
+        <select id="mmfg" class="fi">
+          <option value="false">✅ Available (In Stock)</option>
+          <option value="true">🏭 Manufactured (By us)</option>
+        </select>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="saveModal()" class="btn btn-r flex-1 justify-center syne font-bold tracking-wide">💾 SAVE CHANGES</button>
+        <button onclick="closeModal()" class="btn btn-g">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════ -->
+<script>
+// ── CONFIG (UPDATE THIS FOR YOUR PROJECT) ──
+const CFG = {
+  apiKey: "AIzaSyBeM8hNfIupls_x0GapogzBj-PGtCFxZ0A",
+  authDomain: "motor-parts-web.firebaseapp.com",
+  projectId: "motor-parts-web",
+  storageBucket: "motor-parts-web.firebasestorage.app",
+  messagingSenderId: "323231299347",
+  appId: "1:323231299347:web:eb5289110136b6c9bc8ce6"
+};
+
+let db, auth, ALL = [], FILTERED = [], pg = 1;
+const PER = 20;
+
+// Init Firebase
+try { firebase.initializeApp(CFG); } catch(e) {}
+db = firebase.firestore();
+auth = firebase.auth();
+
+// ── TOAST ──
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type||'');
+  setTimeout(function(){ t.className = ''; }, 3500);
+}
+
+// ── AUTH ──
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    var em = user.email || 'admin';
+    document.getElementById('uname').textContent = em.split('@')[0];
+    document.getElementById('uav').textContent = em[0].toUpperCase();
+    loadAll();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+document.getElementById('lbtn').addEventListener('click', async function() {
+  var btn = this, err = document.getElementById('lerr');
+  err.classList.add('hidden');
+  var em = document.getElementById('lem').value.trim();
+  var pw = document.getElementById('lpw').value;
+  if (!em || !pw) { err.textContent = 'Enter email and password.'; err.classList.remove('hidden'); return; }
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  try { await auth.signInWithEmailAndPassword(em, pw); }
+  catch(e) { err.textContent = e.message; err.classList.remove('hidden'); btn.textContent = 'SIGN IN →'; btn.disabled = false; }
+});
+document.getElementById('lpw').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('lbtn').click(); });
+function doLogout() { if (confirm('Sign out?')) auth.signOut(); }
+
+// ── NAVIGATION ──
+var SEC_TITLES = {
+  dashboard: ['Dashboard', 'Overview of your catalog and orders'],
+  products:  ['Product Catalog', 'Manage all your products'],
+  add:       ['Add Product', 'Fill the form to add to Firebase'],
+  orders:    ['Customer Orders', 'Orders from your website']
+};
+function goTo(name, el) {
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('on'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('on'); });
+  var sec = document.getElementById('s-' + name);
+  if (sec) sec.classList.add('on');
+  if (el) el.classList.add('on');
+  var t = SEC_TITLES[name] || [name,''];
+  document.getElementById('ptitle').textContent = t[0];
+  document.getElementById('psub').textContent = t[1];
+  if (name === 'products') { FILTERED = [...ALL]; renderTable(); }
+  if (name === 'dashboard') updateDash();
+  if (name === 'orders') loadOrders('new', document.querySelector('#s-orders .tab-pill'));
+  if (name === 'add') { clearForm(); document.getElementById('ftitle').textContent = 'Add New Product'; }
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  try {
+    var snap = await db.collection('products').orderBy('id').get();
+    ALL = snap.docs.map(function(d){ return Object.assign({ docId: d.id }, d.data()); });
+    FILTERED = [...ALL];
+    updateDash();
+  } catch(e) { toast('Load error: ' + e.message, 'err'); }
+}
+
+// ── DASHBOARD ──
+function updateDash() {
+  var tot = ALL.length;
+  var mfg = ALL.filter(function(p){ return p.mfg; }).length;
+  document.getElementById('ds-tot').textContent = tot;
+  document.getElementById('ds-mfg').textContent = mfg;
+  document.getElementById('ds-avail').textContent = tot - mfg;
+  document.getElementById('ptxt').textContent = tot + ' Products';
+  var rec = ALL.slice(-6).reverse();
+  document.getElementById('dash-recent').innerHTML = rec.length ? rec.map(function(p){
+    return '<div class="flex items-center gap-3 px-5 py-3" style="border-bottom:1px solid #F5F4F2">'
+      +'<div class="w-10 h-10 bg-stone-50 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">'
+      +(p.imgUrl ? '<img src="'+p.imgUrl+'" class="w-full h-full object-contain" loading="lazy">' : '<span class="text-lg opacity-20">🔧</span>')
+      +'</div><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">'+(p.type||'')+'</div>'
+      +'<div class="text-xs text-stone-400 mono">'+(p.num||'')+' · '+(p.brand||'')+'</div></div>'
+      +'<span class="syne font-bold text-red-600 text-sm flex-shrink-0">Rs '+(p.price||0).toLocaleString()+'</span></div>';
+  }).join('') : '<div class="p-5 text-center text-stone-400 text-sm">No products yet</div>';
+}
+
+// ── FILTER + TABLE ──
+function filterProds() {
+  var q = document.getElementById('psrch').value.toLowerCase().trim();
+  var br = document.getElementById('pbrand').value;
+  var ty = document.getElementById('ptype').value;
+  FILTERED = ALL.filter(function(p){
+    if (br && p.brand !== br) return false;
+    if (ty && p.type !== ty) return false;
+    if (q && !((p.num||'').toLowerCase().includes(q)||(p.type||'').toLowerCase().includes(q)||(p.vehicles||'').toLowerCase().includes(q)||(p.brand||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  pg = 1; renderTable();
+}
+
+function renderTable() {
+  var wrap = document.getElementById('ptable');
+  var tot = FILTERED.length;
+  document.getElementById('ptxt').textContent = tot + ' Products';
+  if (!tot) {
+    wrap.innerHTML = '<div class="p-10 text-center text-stone-400"><div class="text-4xl mb-3 opacity-20">🔍</div><p>No products found</p></div>';
+    document.getElementById('ppag').style.display = 'none';
+    return;
+  }
+  var pages = Math.ceil(tot / PER);
+  var st = (pg-1)*PER;
+  var sl = FILTERED.slice(st, st+PER);
+  wrap.innerHTML = '<div style="overflow-x:auto"><table class="tbl"><thead><tr>'
+    +'<th>#</th><th>Photo</th><th>Part #</th><th>Type</th><th>Brand</th><th>Fits</th><th>Price</th><th>Status</th><th>Actions</th>'
+    +'</tr></thead><tbody>'
+    + sl.map(function(p,i){
+      return '<tr>'
+        +'<td class="text-stone-400 text-xs">'+(st+i+1)+'</td>'
+        +'<td><div class="w-10 h-10 bg-stone-50 rounded-lg flex items-center justify-center overflow-hidden">'
+        +(p.imgUrl?'<img src="'+p.imgUrl+'" class="w-full h-full object-contain" loading="lazy" onerror="this.parentNode.innerHTML=\'<span class=text-lg>🔧</span>\'">':'<span class="text-lg opacity-20">🔧</span>')
+        +'</div></td>'
+        +'<td><span class="mono text-xs text-stone-500">'+(p.num||'—')+'</span></td>'
+        +'<td class="font-semibold text-sm">'+(p.type||'—')+'</td>'
+        +'<td class="text-sm text-stone-500">'+(p.brand||'—')+'</td>'
+        +'<td class="text-xs text-stone-400" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(p.vehicles||'')+'">'+(p.vehicles||'—')+'</td>'
+        +'<td><span class="syne font-bold text-red-600">Rs '+(p.price||0).toLocaleString()+'</span></td>'
+        +'<td><span class="'+(p.mfg?'bmfg':'bavail')+'">'+(p.mfg?'🏭 MFG':'✅ Stock')+'</span></td>'
+        +'<td><div class="flex gap-1.5">'
+        +'<button onclick="openEdit(\''+p.docId+'\')" class="btn btn-dk bsm text-xs">✏ Edit</button>'
+        +'<button onclick="delProd(\''+p.docId+'\',this)" class="btn bsm text-xs" style="background:#FEF2F2;color:var(--r)">✕</button>'
+        +'</div></td></tr>';
+    }).join('')
+    +'</tbody></table></div>';
+
+  var pagEl = document.getElementById('ppag');
+  pagEl.style.display = 'flex';
+  document.getElementById('ppag-info').textContent = 'Showing '+(st+1)+'–'+Math.min(st+PER,tot)+' of '+tot;
+  var btnsEl = document.getElementById('ppag-btns');
+  btnsEl.innerHTML = '';
+  function mkpb(lbl, p2, act) {
+    var b = document.createElement('button');
+    b.className = 'pbtn'+(act?' on':'');
+    b.textContent = lbl;
+    b.onclick = function(){ pg = p2; renderTable(); };
+    return b;
+  }
+  if (pg > 1) btnsEl.appendChild(mkpb('←', pg-1, false));
+  var sp = Math.max(1,pg-2), ep = Math.min(pages,sp+4);
+  for (var i=sp;i<=ep;i++) btnsEl.appendChild(mkpb(i,i,i===pg));
+  if (pg < pages) btnsEl.appendChild(mkpb('→', pg+1, false));
+}
+
+// ── EDIT MODAL ──
+function openEdit(docId) {
+  var p = ALL.find(function(x){ return x.docId === docId; });
+  if (!p) return;
+  document.getElementById('mdocid').value = docId;
+  document.getElementById('mnum').value = p.num||'';
+  document.getElementById('mtype').value = p.type||'';
+  document.getElementById('mbrand').value = p.brand||'';
+  document.getElementById('mprice').value = p.price||'';
+  document.getElementById('mveh').value = p.vehicles||'';
+  document.getElementById('mmfg').value = String(p.mfg||false);
+  document.getElementById('mimgd').value = p.imgUrl||'';
+  var mp = document.getElementById('mphoto');
+  var mph = document.getElementById('mphoto-ph');
+  if (p.imgUrl) { mp.src = p.imgUrl; mp.style.display = 'block'; mph.style.display = 'none'; }
+  else { mp.style.display = 'none'; mph.style.display = 'block'; }
+  document.getElementById('mtitle').textContent = 'Edit: ' + (p.num||'Product');
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); document.body.style.overflow = ''; }
+
+async function saveModal() {
+  var docId = document.getElementById('mdocid').value;
+  var imgd = document.getElementById('mimgd').value;
+  var data = {
+    num: document.getElementById('mnum').value.trim(),
+    type: document.getElementById('mtype').value,
+    brand: document.getElementById('mbrand').value,
+    price: parseFloat(document.getElementById('mprice').value)||0,
+    mfg: document.getElementById('mmfg').value==='true',
+    vehicles: document.getElementById('mveh').value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  if (imgd) data.imgUrl = imgd;
+  if (!data.num||!data.type||!data.brand||!data.vehicles) { toast('Fill all required fields','err'); return; }
+  try {
+    await db.collection('products').doc(docId).update(data);
+    var idx = ALL.findIndex(function(x){ return x.docId===docId; });
+    if (idx>=0) ALL[idx] = Object.assign(ALL[idx], data);
+    FILTERED = [...ALL]; renderTable(); updateDash();
+    closeModal(); toast('✅ Product updated!', 'ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+// ── MODAL FILE UPLOAD ──
+function onFile(input, imgId, wrapId, dataId) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { toast('File too large — max 10MB','err'); return; }
+  var r = new FileReader();
+  r.onload = function(e) {
+    document.getElementById(dataId).value = e.target.result;
+    var img = document.getElementById(imgId);
+    img.src = e.target.result; img.style.display = 'block';
+    var wrap = document.getElementById(wrapId);
+    if (wrap && wrap.classList) wrap.classList.remove('hidden');
+  };
+  r.readAsDataURL(file);
+}
+
+// ── DRAG & DROP ──
+var fdz = document.getElementById('fdz');
+fdz.addEventListener('dragover', function(e){ e.preventDefault(); fdz.classList.add('over'); });
+fdz.addEventListener('dragleave', function(){ fdz.classList.remove('over'); });
+fdz.addEventListener('drop', function(e){
+  e.preventDefault(); fdz.classList.remove('over');
+  var file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    var dt = new DataTransfer(); dt.items.add(file);
+    document.getElementById('ffile').files = dt.files;
+    onFile(document.getElementById('ffile'),'fphoto','fphoto-wrap','fimgd');
+  }
+});
+
+// ── DRIVE URL HELPER ──
+function driveToImg(url) {
+  var m1 = url.match(/\/file\/d\/([^\/\?]+)/);
+  if (m1) return 'https://drive.google.com/thumbnail?id='+m1[1]+'&sz=w600';
+  var m2 = url.match(/[?&]id=([^&]+)/);
+  if (m2) return 'https://drive.google.com/thumbnail?id='+m2[1]+'&sz=w600';
+  return url;
+}
+
+function previewDrive(inputId, imgId, wrapId, dataId) {
+  var raw = document.getElementById(inputId).value.trim();
+  if (!raw) { toast('Paste a Google Drive link first','err'); return; }
+  var url = driveToImg(raw);
+  document.getElementById(dataId).value = url;
+  var img = document.getElementById(imgId);
+  img.src = url; img.style.display = 'block';
+  var wrap = document.getElementById(wrapId);
+  if (wrap && wrap.classList) wrap.classList.remove('hidden');
+  toast('✅ Drive image loaded!', 'ok');
+}
+
+function previewUrl(inputId, imgId, wrapId, dataId) {
+  var url = document.getElementById(inputId).value.trim();
+  if (!url) { toast('Enter an image URL first','err'); return; }
+  document.getElementById(dataId).value = url;
+  var img = document.getElementById(imgId);
+  img.src = url; img.style.display = 'block';
+  var wrap = document.getElementById(wrapId);
+  if (wrap && wrap.classList) wrap.classList.remove('hidden');
+  toast('✅ Image loaded!', 'ok');
+}
+
+// ── PHOTO TABS ──
+function photoTab(tab, btn) {
+  document.querySelectorAll('#s-add .tab-pill').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.getElementById('pt-direct').style.display = tab==='direct' ? 'block' : 'none';
+  document.getElementById('pt-drive').style.display = tab==='drive' ? 'block' : 'none';
+  document.getElementById('pt-url').style.display = tab==='url' ? 'block' : 'none';
+}
+
+function clearFPhoto() {
+  document.getElementById('fphoto-wrap').classList.add('hidden');
+  document.getElementById('fimgd').value = '';
+  document.getElementById('ffile').value = '';
+}
+
+// ── ADD PRODUCT ──
+function clearForm() {
+  ['fnum','fveh','fprice'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['ftype','fbrand'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fmfg').value='false';
+  document.getElementById('feid').value='';
+  document.getElementById('fimgd').value='';
+  document.getElementById('ffile').value='';
+  document.getElementById('fdriveurl').value='';
+  document.getElementById('fimgurl').value='';
+  document.getElementById('fphoto-wrap').classList.add('hidden');
+}
+
+async function saveProd() {
+  var num = document.getElementById('fnum').value.trim();
+  var type = document.getElementById('ftype').value;
+  var brand = document.getElementById('fbrand').value;
+  var price = parseFloat(document.getElementById('fprice').value)||0;
+  var veh = document.getElementById('fveh').value.trim();
+  var mfg = document.getElementById('fmfg').value==='true';
+  var imgd = document.getElementById('fimgd').value;
+  var eid = document.getElementById('feid').value;
+  if (!num||!type||!brand||!veh) { toast('⚠️ Fill all required (*) fields','err'); return; }
+  var data = { num, type, brand, price, mfg, vehicles: veh, imgUrl: imgd, updatedAt: new Date().toISOString() };
+  try {
+    if (eid) {
+      await db.collection('products').doc(eid).update(data);
+      var idx = ALL.findIndex(function(x){ return x.docId===eid; });
+      if (idx>=0) ALL[idx] = Object.assign(ALL[idx], data);
+      toast('✅ Product updated!','ok');
+    } else {
+      var maxId = ALL.reduce(function(m,p){ return Math.max(m,p.id||0); }, 0);
+      var newId = maxId + 1;
+      var nd = Object.assign({ id: newId }, data);
+      await db.collection('products').doc(String(newId)).set(nd);
+      ALL.push(Object.assign({ docId: String(newId) }, nd));
+      toast('✅ Product added! Part #'+num,'ok');
+    }
+    FILTERED = [...ALL]; updateDash(); clearForm();
+    setTimeout(function(){ goTo('products', document.querySelector('[data-sec=products]')); }, 1200);
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function delProd(docId, num) {
+  if (!confirm('Delete "'+num+'"? Cannot be undone.')) return;
+  try {
+    await db.collection('products').doc(docId).delete();
+    ALL = ALL.filter(function(x){ return x.docId!==docId; });
+    FILTERED = FILTERED.filter(function(x){ return x.docId!==docId; });
+    renderTable(); updateDash(); toast('✅ Deleted','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+// ── ORDERS ──
+async function loadOrders(status, btn) {
+  if (btn) { document.querySelectorAll('#s-orders .tab-pill').forEach(function(b){ b.classList.remove('on'); }); btn.classList.add('on'); }
+  var wrap = document.getElementById('ordwrap');
+  wrap.innerHTML = '<div class="text-center py-12"><div class="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full spin mx-auto"></div></div>';
+  try {
+    var ref = db.collection('orders');
+    var snap = status ? await ref.where('status','==',status).get() : await ref.get();
+    var orders = snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); })
+      .sort(function(a,b){
+        var ta = a.createdAt?(a.createdAt.toMillis?a.createdAt.toMillis():new Date(a.createdAt).getTime()):0;
+        var tb = b.createdAt?(b.createdAt.toMillis?b.createdAt.toMillis():new Date(b.createdAt).getTime()):0;
+        return tb-ta;
+      });
+    var nc = snap.docs.filter(function(d){ return (d.data().status||'new')==='new'; }).length;
+    var ob = document.getElementById('obadge');
+    ob.textContent = nc; ob.style.display = nc>0?'inline':'none';
+    document.getElementById('ds-ord').textContent = nc;
+    if (!orders.length) {
+      wrap.innerHTML = '<div class="text-center py-16 text-stone-400"><div class="text-5xl mb-4 opacity-25">📭</div><p class="font-semibold text-stone-500">No orders found</p><p class="text-sm mt-1">Orders from your website appear here automatically</p></div>';
+      return;
+    }
+    wrap.innerHTML = '<div class="space-y-4">' + orders.map(function(o){
+      var ts = o.createdAt?(o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt)):new Date();
+      var ds = ts.toLocaleString('en-LK',{dateStyle:'medium',timeStyle:'short'});
+      var sc = 's-'+(o.status||'new');
+      return '<div class="bg-white rounded-2xl p-5 shadow-sm" style="border:1px solid #F0EFEE">'
+        +'<div class="flex justify-between items-start mb-3">'
+        +'<div><div class="mono text-xs text-stone-400">#'+o.id.slice(-6).toUpperCase()+'</div>'
+        +'<div class="font-bold text-stone-900 text-base mt-0.5">'+(o.name||'Unknown')+'</div>'
+        +'<div class="text-xs text-stone-400">'+ds+'</div></div>'
+        +'<select class="sbadge '+sc+'" onchange="updOrd(\''+o.id+'\',this.value,this)">'
+        +'<option value="new"'+(o.status==='new'?' selected':'')+'>🆕 New</option>'
+        +'<option value="contacted"'+(o.status==='contacted'?' selected':'')+'>📞 Contacted</option>'
+        +'<option value="done"'+(o.status==='done'?' selected':'')+'>✅ Done</option>'
+        +'</select></div>'
+        +'<div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm mb-3">'
+        +'<div><span class="text-stone-400 text-xs font-semibold uppercase tracking-wide block">Phone</span>'+(o.phone||'—')+'</div>'
+        +'<div><span class="text-stone-400 text-xs font-semibold uppercase tracking-wide block">Part</span>'+(o.part||o.vehicle||'—')+'</div>'
+        +(o.city?'<div><span class="text-stone-400 text-xs font-semibold uppercase tracking-wide block">City</span>'+o.city+'</div>':'')
+        +(o.vehicle&&o.part?'<div><span class="text-stone-400 text-xs font-semibold uppercase tracking-wide block">Vehicle</span>'+o.vehicle+'</div>':'')
+        +'</div>'
+        +(o.note?'<div class="rounded-lg p-3 text-sm text-stone-600 mb-3" style="background:#F7F6F3">📝 '+o.note+'</div>':'')
+        +'<div class="flex gap-2">'
+        +'<a href="https://wa.me/'+(o.phone||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hello '+(o.name||'')+', regarding your order for '+(o.part||'parts')+'...')+'" target="_blank" class="btn btn-gr bsm text-xs">💬 WhatsApp</a>'
+        +'<a href="tel:'+(o.phone||'')+'" class="btn btn-g bsm text-xs">📞 Call</a>'
+        +'</div></div>';
+    }).join('') + '</div>';
+  } catch(e) {
+    wrap.innerHTML = '<div class="text-center py-12 text-stone-400 text-sm">Error: '+e.message+'</div>';
+  }
+}
+
+async function updOrd(id, status, el) {
+  try {
+    await db.collection('orders').doc(id).update({ status: status });
+    el.className = 'sbadge s-'+status;
+    toast('Order status updated','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
