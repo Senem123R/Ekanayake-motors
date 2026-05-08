@@ -16,9 +16,8 @@
 
 | Platform | Link |
 |----------|------|
-| 🌍 Customer Website | [your-netlify-url.netlify.app](#) |
-| 🔒 Admin Panel | [your-netlify-url.netlify.app/admin](#) |
-| ⚙️ Backend API | [your-render-url.onrender.com](#) |
+| 🌍 Customer Website | [[your-netlify-url.netlify.app](https://ekanayaka-motor-industries.com/)](#) |
+| 🔒 Admin Panel | [[your-netlify-url.netlify.app/admin](https://fascinating-baklava-30878a.netlify.app/)](#) |
 
 ---
 
